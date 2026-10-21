@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "name": "Atlas Insights",
+      "owner": "Mona Patel",
+      "status": "In progress",
+      "recentActivity": "Updated the reporting flow and reviewed feedback from the pilot team.",
+      "priority": "High",
+      "summary": "Bring product usage trends into one reliable, easy-to-scan analytics workspace."
+    },
+    {
+      "name": "Northstar Onboarding",
+      "owner": "Jordan Lee",
+      "status": "On track",
+      "recentActivity": "Completed the first-run checklist and handed copy updates to the review team.",
+      "priority": "Medium",
+      "summary": "Help new contributors reach their first successful project milestone with less friction."
+    },
+    {
+      "name": "Signal Reliability",
+      "owner": "Avery Chen",
+      "status": "At risk",
+      "recentActivity": "Investigating intermittent delays and preparing a mitigation update.",
+      "priority": "High",
+      "summary": "Improve the reliability and visibility of the event pipeline used by internal teams."
+    },
+    {
+      "name": "Commons Documentation",
+      "owner": "Sam Rivera",
+      "status": "Planning",
+      "recentActivity": "Collected contributor questions and drafted the proposed information architecture.",
+      "priority": "Low",
+      "summary": "Make shared team guidance easier to discover, maintain, and contribute to."
+    }
+  ]
+}

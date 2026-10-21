@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="A contributor-friendly overview of project ownership, status, activity, and priorities."
+    >
+    <title>Project Pulse</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="dashboard">
+      <header class="dashboard-header">
+        <p class="eyebrow">Team overview</p>
+        <h1>Project Pulse</h1>
+        <p class="dashboard-meta">A clear snapshot of ownership, progress, and what needs attention.</p>
+      </header>
+
+      <section
+        id="project-content"
+        aria-label="Projects"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <p class="loading-state">Loading projects…</p>
+      </section>
+    </main>
+    <script>
+      const content = document.getElementById("project-content");
+
+      function getDisplayValue(value, fallback) {
+        if (typeof value === "string" && value.trim()) {
+          return value.trim();
+        }
+        if (typeof value === "number" && Number.isFinite(value)) {
+          return String(value);
+        }
+        return fallback;
+      }
+
+      function createTextElement(tagName, className, text) {
+        const element = document.createElement(tagName);
+        if (className) {
+          element.className = className;
+        }
+        element.textContent = text;
+        return element;
+      }
+
+      function toKebabCase(value) {
+        return value
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+      }
+
+      function createDetail(label, value, valueClassName) {
+        const fragment = document.createDocumentFragment();
+        const labelClassName = label === "Recent activity" ? "activity-label" : "";
+        fragment.append(createTextElement("dt", labelClassName, label));
+
+        const description = document.createElement("dd");
+        const valueElement = createTextElement("span", valueClassName, value);
+        if (valueClassName === "status-badge") {
+          valueElement.setAttribute("data-status", toKebabCase(value));
+        } else if (valueClassName === "priority") {
+          valueElement.setAttribute("data-priority", toKebabCase(value));
+        }
+        description.append(valueElement);
+        fragment.append(description);
+        return fragment;
+      }
+
+      function createProjectCard(project) {
+        const record = project && typeof project === "object" ? project : {};
+        const card = document.createElement("article");
+        card.className = "project-card";
+
+        const header = document.createElement("header");
+        header.className = "project-card__header";
+        header.append(
+          createTextElement("h2", "", getDisplayValue(record.name, "Untitled project")),
+          createTextElement(
+            "p",
+            "project-card__owner",
+            `Owner: ${getDisplayValue(record.owner, "Not provided")}`
+          )
+        );
+
+        const summary = createTextElement(
+          "p",
+          "project-card__summary",
+          getDisplayValue(record.summary, "No summary provided.")
+        );
+
+        const details = document.createElement("dl");
+        details.className = "project-card__details";
+        details.append(
+          createDetail("Status", getDisplayValue(record.status, "Not provided"), "status-badge"),
+          createDetail("Priority", getDisplayValue(record.priority, "Not provided"), "priority"),
+          createDetail(
+            "Recent activity",
+            getDisplayValue(record.recentActivity, "No recent activity provided."),
+            ""
+          )
+        );
+
+        card.append(header, summary, details);
+        return card;
+      }
+
+      function showState(className, message) {
+        content.setAttribute("aria-busy", "false");
+        content.replaceChildren(createTextElement("p", className, message));
+      }
+
+      function renderProjects(projects) {
+        content.setAttribute("aria-busy", "false");
+        if (projects.length === 0) {
+          showState("empty-state", "No projects are available yet. Check back for updates.");
+          return;
+        }
+
+        const grid = document.createElement("div");
+        grid.className = "project-grid";
+        for (const project of projects) {
+          grid.append(createProjectCard(project));
+        }
+        content.replaceChildren(grid);
+      }
+
+      async function loadProjects() {
+        try {
+          const response = await fetch("project-data.json");
+          if (!response.ok) {
+            throw new Error(`The project data request failed (${response.status}).`);
+          }
+
+          const data = await response.json();
+          if (!data || typeof data !== "object" || !Array.isArray(data.projects)) {
+            throw new Error("The project data must contain a projects array.");
+          }
+          renderProjects(data.projects);
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : "An unexpected error occurred.";
+          showState("error-state", `Project data could not be loaded. ${message}`);
+        }
+      }
+
+      loadProjects();
+    </script>
+  </body>
+</html>
